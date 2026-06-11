@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Intelligence Dashboard | Developed by Madhura Kullarkar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .header p { opacity: 0.8; }
+        .developer {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            color: #aaa;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .card h2 {
+            margin-bottom: 20px;
+            color: #00d2ff;
+            font-size: 1.4rem;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        input[type="text"]:focus { border-color: #00d2ff; }
+        input[type="text"]::placeholder { color: rgba(255,255,255,0.4); }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,210,255,0.3);
+        }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #00d2ff;
+        }
+        .loading.active { display: block; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #00d2ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-details {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .detail-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label {
+            font-weight: 600;
+            color: #00d2ff;
+            min-width: 160px;
+        }
+        .detail-value { color: #ddd; flex: 1; word-break: break-word; }
+        .email-list { list-style: none; }
+        .email-list li { padding: 3px 0; color: #3a7bd5; }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .company-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+        .company-card:hover { transform: translateY(-3px); }
+        .company-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #00d2ff;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(0,210,255,0.3);
+        }
+        .info-item { margin-bottom: 8px; font-size: 0.9rem; }
+        .info-label { font-weight: 600; color: #3a7bd5; display: block; }
+        .info-value { color: #ccc; }
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(0,210,255,0.2), rgba(58,123,213,0.2));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #00d2ff; display: block; }
+        .stat-label { font-size: 0.8rem; color: #aaa; margin-top: 5px; }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-success { background: #10b981; }
+        .toast-error { background: #ef4444; }
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            padding: 20px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Company Intelligence Dashboard</h1>
+            <p>AI-Powered Business Insights & Automated Enrichment</p>
+            <p class="developer">Developed by <strong>Madhura Kullarkar</strong></p>
+        </div>
+
+        <!-- Enrich Section -->
+        <div class="card">
+            <h2>🔍 Enrich Company</h2>
+            <input type="text" id="websiteName" placeholder="Website Name (for record-keeping)">
+            <input type="text" id="urlInput" placeholder="Enter company URL (e.g., https://www.stripe.com)">
+            <div class="btn-group">
+                <button onclick="enrichCompany()">🚀 Enrich</button>
+            </div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing company data with AI...</p>
+            </div>
+            <div id="resultContainer"></div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="card">
+            <h2>📊 All Results</h2>
+            <div class="btn-group">
+                <button onclick="loadResults()">📋 Show All Results</button>
+                <button class="btn-secondary" onclick="preloadSamples()">⚡ Load Sample Data</button>
+            </div>
+            <div class="loading" id="loading2">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+            <div id="resultsStats"></div>
+            <div class="results-grid" id="resultsGrid"></div>
+        </div>
+
+        <div class="footer">
+            © 2025 Company Intelligence Dashboard | Developed by Madhura Kullarkar
+        </div>
+    </div>
+
+    <script>
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function enrichCompany() {
+            const url = document.getElementById('urlInput').value.trim();
+            const websiteName = document.getElementById('websiteName').value.trim();
+            
+            if (!url) {
+                showToast('Please enter a URL', 'error');
+                return;
+            }
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('resultContainer').innerHTML = '';
+
+            try {
+                const res = await fetch('/enrich', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, website_name: websiteName })
+                });
+                const data = await res.json();
+                
+                if (data.error) {
+                    showToast(data.error, 'error');
+                    return;
+                }
+
+                document.getElementById('resultContainer').innerHTML = `
+                    <div class="result-details">
+                        <div class="detail-row"><span class="detail-label">🌐 Website</span><span class="detail-value">${data.website_name||'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">🏢 Company</span><span class="detail-value">${data.company_name||'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">📍 Address</span><span class="detail-value">${data.address||'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">📞 Phone</span><span class="detail-value">${data.mobile_number||'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">📧 Email</span><span class="detail-value"><ul class="email-list">${(data.mail||[]).map(e=>`<li>${e}</li>`).join('')||'<li>N/A</li>'}</ul></span></div>
+                        <div class="detail-row"><span class="detail-label">🔧 Core Service</span><span class="detail-value">${data.core_service||'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">🎯 Target Customer</span><span class="detail-value">${data.target_customer||'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">⚠️ Pain Point</span><span class="detail-value">${data.probable_pain_point||'N/A'}</span></div>
+                        <div class="detail-row"><span class="detail-label">💬 Outreach</span><span class="detail-value">${data.outreach_opener||'N/A'}</span></div>
+                    </div>`;
+                
+                showToast('Company enriched successfully!', 'success');
+            } catch (e) {
+                showToast('Error enriching company', 'error');
+            }
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        async function loadResults() {
+            document.getElementById('loading2').classList.add('active');
+            try {
+                const res = await fetch('/results');
+                const data = await res.json();
+                displayResults(data);
+            } catch (e) {
+                showToast('Error loading results', 'error');
+            }
+            document.getElementById('loading2').classList.remove('active');
+        }
+
+        async function preloadSamples() {
+            document.getElementById('loading2').classList.add('active');
+            try {
+                await fetch('/preload', { method: 'POST' });
+                loadResults();
+                showToast('Sample companies loaded!', 'success');
+            } catch (e) {
+                showToast('Error loading samples', 'error');
+            }
+        }
+
+        function displayResults(companies) {
+            const grid = document.getElementById('resultsGrid');
+            if (!companies.length) {
+                grid.innerHTML = '<p style="text-align:center;color:#888;">No results. Click Load Sample Data!</p>';
+                document.getElementById('resultsStats').innerHTML = '';
+                return;
+            }
+            
+            document.getElementById('resultsStats').innerHTML = `
+                <div class="stats">
+                    <div class="stat-card"><span class="stat-number">${companies.length}</span><span class="stat-label">Companies</span></div>
+                    <div class="stat-card"><span class="stat-number">${companies.filter(c=>c.mail&&c.mail.length).length}</span><span class="stat-label">With Email</span></div>
+                    <div class="stat-card"><span class="stat-number">${companies.filter(c=>c.mobile_number&&c.mobile_number!=='N/A').length}</span><span class="stat-label">With Phone</span></div>
+                </div>`;
+            
+            grid.innerHTML = companies.map(c => `
+                <div class="company-card">
+                    <div class="company-name">${c.company_name||'Unknown'}</div>
+                    <div class="info-item"><span class="info-label">Website</span><span class="info-value">${c.website_name||'N/A'}</span></div>
+                    <div class="info-item"><span class="info-label">Service</span><span class="info-value">${c.core_service||'N/A'}</span></div>
+                    <div class="info-item"><span class="info-label">Phone</span><span class="info-value">${c.mobile_number||'N/A'}</span></div>
+                    <div class="info-item"><span class="info-label">Email</span><span class="info-value">${(c.mail||[])[0]||'N/A'}</span></div>
+                </div>
+            `).join('');
+        }
+
+        loadResults();
+    </script>
+</body>
+</html>
