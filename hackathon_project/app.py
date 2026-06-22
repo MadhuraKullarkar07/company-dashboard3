@@ -7,7 +7,7 @@ import time
 from groq import Groq
 
 # ==========================================
-client = Groq(api_key="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")
+client = Groq(api_key="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")
 # ==========================================
 
 results_store = []
